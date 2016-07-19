@@ -10,6 +10,9 @@
 
 -behaviour(gen_server).
 
+-type rxdb_key() :: binary().
+-type rxdb_value() :: binary(). 
+
 %% RXDB API
 -export([get/1, put/2, del/1]).
 
@@ -22,20 +25,32 @@
 
 -define(SERVER, ?MODULE).
 
--record(state, {table }).
+-record(state, {store}).
 
 %%%===================================================================
 %%% API
 %%%===================================================================
 
+-spec get(KeyID :: rxdb_key()) -> [] | [{rxdb_key(), rxdb_value()}] | {error, term()}.
+
+get(KeyID) when is_binary(KeyID) ->
+    gen_server:call(?SERVER, {get, KeyID});
 get(KeyID) ->
-    gen_server:call(?SERVER, {get, KeyID}).
+    {error, KeyID}.
 
+-spec put(KeyID :: rxdb_key(), Value :: rxdb_value()) -> ok | {error, {term(), term()}}.
+
+put(KeyID, Value) when is_binary(KeyID) andalso is_binary(Value) ->
+    gen_server:cast(?SERVER, {put, KeyID, Value});
 put(KeyID, Value) ->
-    gen_server:cast(?SERVER, {put, KeyID, Value}).
+    {error, {KeyID, Value}}.
 
+-spec del(KeyID :: rxdb_key()) -> ok | {error, term()}.
+
+del(KeyID) when is_binary(KeyID) ->
+    gen_server:cast(?SERVER, {del, KeyID});
 del(KeyID) ->
-    gen_server:cast(?SERVER, {del, KeyID}).
+    {error, KeyID}.
 
 
 %%--------------------------------------------------------------------
@@ -64,9 +79,9 @@ start_link() ->
 %% @end
 %%--------------------------------------------------------------------
 init([]) ->
-    Table = ets:new(rxdb_ets_table, 
-		    [set, private, {write_concurrency, true}]),
-    {ok, #state{table = Table}}.
+    Store = ets:new(rxdb_ets_store, 
+		    [set, protected]),
+    {ok, #state{store = Store}}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -82,9 +97,10 @@ init([]) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_call({get, KeyID}, _From, #state{table = Table} = State) ->
-    Reply = ets:lookup(Table, KeyID),
-    {reply, Reply, State};
+handle_call({get, KeyID}, From, #state{store = Store} = State) ->
+    %% unnecessary here, but nice perfomance trick. 
+    spawn(fun() -> gen_server:reply(From, ets:lookup(Store, KeyID)) end),
+    {noreply, State};
 
 handle_call(_Request, _From, State) ->
     Reply = ok,
@@ -101,12 +117,12 @@ handle_call(_Request, _From, State) ->
 %% @end
 %%--------------------------------------------------------------------
 
-handle_cast({put, KeyID, Value}, #state{table = Table} = State) ->
-    ets:insert(Table, {KeyID, Value}),
+handle_cast({put, KeyID, Value}, #state{store = Store} = State) ->
+    ets:insert(Store, {KeyID, Value}),
     {noreply, State};
 
-handle_cast({del, KeyID}, #state{table = Table} = State) ->
-    ets:delete(Table, KeyID),
+handle_cast({del, KeyID}, #state{store = Store} = State) ->
+    ets:delete(Store, KeyID),
     {noreply, State};
 
 handle_cast(_Msg, State) ->
