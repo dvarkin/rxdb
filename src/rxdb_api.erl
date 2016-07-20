@@ -80,7 +80,8 @@ api(#{?ACTION := ?DEL, ?KEY := Key}) ->
     Result = rxdb:del(Key),
     error_handler(Result);
 
-api(_) ->
+api(Err) ->
+    error_logger:error_msg("API Error: unsupported message ~p~n", [Err]),
     <<"Unupported operation">>.
 
 -spec api(Data :: map(), Client :: port()) -> binary().

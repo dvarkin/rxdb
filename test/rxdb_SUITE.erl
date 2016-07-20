@@ -12,11 +12,11 @@
 
 -define(PUT, <<"{\"value\":\"Val\",\"key\":\"a\",\"action\":\"put\"}">>).
 -define(PUT1, <<"{\"value\":\"Val1\",\"key\":\"a\",\"action\":\"put\"}">>).
--define(GET, <<"{\"value\":\"Val1\",\"key\":\"a\",\"action\":\"get\"}">>).
--define(DEL, <<"{\"value\":\"Val1\",\"key\":\"a\",\"action\":\"del\"}">>).
--define(SUB, <<"{\"value\":\"Val1\",\"key\":\"a\",\"action\":\"sub\"}">>).
+-define(GET, <<"{\"key\":\"a\",\"action\":\"get\"}">>).
+-define(DEL, <<"{\"key\":\"a\",\"action\":\"del\"}">>).
+-define(SUB, <<"{\"key\":\"a\",\"action\":\"sub\"}">>).
 -define(UPD, <<"{\"value\":\"Val1\",\"key\":\"a\",\"action\":\"upd\"}">>).
--define(UNSUB, <<"{\"value\":\"Val1\",\"key\":\"a\",\"action\":\"unsub\"}">>).
+-define(UNSUB, <<"{\"key\":\"a\",\"action\":\"unsub\"}">>).
 -define(OK, <<"\"ok\"">>).
 
 

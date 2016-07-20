@@ -69,7 +69,6 @@ handle_cast({unsub, Key, Client}, #state{subscribers = Store} = State) ->
 
 handle_cast({update, Key, Value}, #state{subscribers = Store} = State) ->
     Clients = [C || {_, C} <- ets:lookup(Store, Key)],
-%    error_logger:info_msg("Clients ~p~n", [Clients]),
     send_updates(Key, Value, Clients),
     {noreply, State};
 
@@ -78,6 +77,7 @@ handle_cast(_Msg, State) ->
     {noreply, State}.
 
 handle_info(_Info, State) ->
+    error_logger:error_msg("Unexpected info ~p: ~p~n", [?MODULE, _Info]),
     {noreply, State}.
 
 terminate(_Reason, _State) ->
@@ -97,9 +97,13 @@ send_updates(Key, Value, [C | Clients]) ->
     send_updates(Key, Value, Clients).
 
 send_to_port(Socket, Key, Value) when is_port(Socket) ->
-    Message = rxdb_api:make_query(upd, Key, Value),
-    gen_tcp:send(Socket, Message);
+    case erlang:port_info(Socket) of
+	undefined ->
+	    ok;
+	_ ->
+	    Message = rxdb_api:make_query(upd, Key, Value),
+	    gen_tcp:send(Socket, Message)
+	end;
 send_to_port(_Socket, _Key, _Value) ->
-
     %% TODO: GC dead ports
     ok.
