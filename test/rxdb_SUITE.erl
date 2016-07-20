@@ -115,7 +115,7 @@ groups() ->
 %% @end
 %%--------------------------------------------------------------------
 all() -> 
-    [binary_test_case, binary_protocol_test_case].
+    [binary_test_case, binary_protocol_test_case, udp_protocol_test_case].
 
 %%--------------------------------------------------------------------
 %% @spec TestCase() -> Info
@@ -144,15 +144,17 @@ binary_protocol_test_case(_Config) ->
     Empty = rxdb_api:parse(Get),
     ok.
 
+udp_protocol_test_case(_Config) ->
+    Ok = <<"\"ok\"">>,
+    Empty = <<"[]">>,
+    Put = <<"{\"value\":\"Val1\",\"key\":\"a\",\"a\":\"put\"}">>,
+    Get = <<"{\"value\":\"Val1\",\"key\":\"a\",\"a\":\"get\"}">>,
+    Del = <<"{\"value\":\"Val1\",\"key\":\"a\",\"a\":\"del\"}">>,
+    Ok = rxdb_udp_client:client(Put),
+    <<"{\"value\":\"Val1\",\"key\":\"a\"}">> = rxdb_udp_client:client(Get),
+    Ok = rxdb_udp_client:client(Del),
+    Empty = rxdb_udp_client:client(Get),
+    ok.
 
     
-%%--------------------------------------------------------------------
-%% @spec TestCase(Config0) ->
-%%               ok | exit() | {skip,Reason} | {comment,Comment} |
-%%               {save_config,Config1} | {skip_and_save,Reason,Config1}
-%% Config0 = Config1 = [tuple()]
-%% Reason = term()
-%% Comment = term()
-%% @end
-%%--------------------------------------------------------------------
 
