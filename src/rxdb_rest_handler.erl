@@ -20,6 +20,11 @@
 	, delete_resource/2
         ]).
 
+-define(RXDB(Call), 
+	case Call of 
+	    {error, Error} -> error_logger:error_msg("RXDB error occurred  ~p during the call ~w~n", [Error, ??Call]);
+	    RxResult -> RxResult
+	end).
 
 trails() ->
     Metadata =
@@ -73,21 +78,21 @@ allowed_methods(Req, State) ->
 %% internal
 handle_get(Req, State) ->
     {KeyID, _Req1} = cowboy_req:binding(key_id, Req),
-    DBReq = rxdb:get(KeyID),
+    DBReq = ?RXDB(rxdb:get(KeyID)),
     JSONReq = jiffy:encode({DBReq}),
     {JSONReq, Req, State}.
 
 handle_put(Req, State) ->
     {KeyID, _} = cowboy_req:binding(key_id, Req),
     {ok, Value, Req1} = cowboy_req:body(Req),
-    rxdb:put(KeyID, Value),
+    ?RXDB(rxdb:put(KeyID, Value)),
     Body1 = [<<"value: ">> ,Value, <<" stored by Key: ">> , KeyID],
     Req2 = cowboy_req:set_resp_body(Body1, Req1),
     {true, Req2, State}.
 
 delete_resource(Req, State)->
     {KeyID, _} = cowboy_req:binding(key_id, Req),
-    rxdb:del(KeyID),
+    ?RXDB(rxdb:del(KeyID)),
     {true, Req, State}.
 
 %%% DEFAULTS FOR RANCH

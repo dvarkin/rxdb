@@ -17,12 +17,17 @@ start(_Type, _Args) ->
 
     %% http listener
 
-    cowboy:start_http(rxdb_http_listener, ListenerCount, [{port, Port}],
+    Listener = cowboy:start_http(rxdb_http_listener, ListenerCount, [{port, Port}],
 		      [{env, [{dispatch, Dispatch}]},
 		       {compress, true},
 		       {timeout, 12000}
 		      ]),
-    rxdb_sup:start_link().
+
+    case Listener of 
+	{ok, _pid} ->
+	    rxdb_sup:start_link();
+	{error, Reason} -> {error, Reason}
+    end.
 
 stop(_State) ->
     ok = cowboy:stop_listener(rxdb_http_listener).
