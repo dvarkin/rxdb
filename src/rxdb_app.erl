@@ -17,18 +17,24 @@ start(_Type, _Args) ->
 
     %% http listener
 
-    Listener = cowboy:start_http(rxdb_http_listener, ListenerCount, [{port, Port}],
+    {ok, _} = cowboy:start_http(rxdb_http_listener, ListenerCount, [{port, Port}],
 		      [{env, [{dispatch, Dispatch}]},
 		       {compress, true},
 		       {timeout, 12000}
 		      ]),
+    %% tcp listener
 
-    case Listener of 
-	{ok, _pid} ->
-	    rxdb_sup:start_link();
-	{error, Reason} -> {error, Reason}
-    end.
+    {ok, _}  = ranch:start_listener(rxdb_tcp_listener, 100,
+				    ranch_tcp, [{port, 5555}],
+				    rxdb_tcp, []
+				   ),
+    
+    %% Start rxdb supervisor
+
+    rxdb_sup:start_link().
+
 
 stop(_State) ->
+    ok = ranch:stop_listener(rxdb_tcp_listener),
     ok = cowboy:stop_listener(rxdb_http_listener).
 

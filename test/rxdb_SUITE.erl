@@ -115,7 +115,7 @@ groups() ->
 %% @end
 %%--------------------------------------------------------------------
 all() -> 
-    [binary_test_case, fail_test_case].
+    [binary_test_case, binary_protocol_test_case].
 
 %%--------------------------------------------------------------------
 %% @spec TestCase() -> Info
@@ -132,16 +132,19 @@ binary_test_case(_Config) ->
     [] = rxdb:get(Key),
     ok.
 
-fail_test_case(_Config) ->
-    Key = "a",
-    Value = 1,
-    Error = {error, Key},
-    {error, {Key, Value}}  = rxdb:put(Key, Value),
-    Error = rxdb:get(Key),
-    Error = rxdb:del(Key),
+binary_protocol_test_case(_Config) ->
+    Ok = <<"\"ok\"">>,
+    Empty = <<"[]">>,
+    Put = <<"{\"value\":\"Val1\",\"key\":\"a\",\"a\":\"put\"}">>,
+    Get = <<"{\"value\":\"Val1\",\"key\":\"a\",\"a\":\"get\"}">>,
+    Del = <<"{\"value\":\"Val1\",\"key\":\"a\",\"a\":\"del\"}">>,
+    Ok = rxdb_api:parse(Put),
+    <<"{\"value\":\"Val1\",\"key\":\"a\"}">> = rxdb_api:parse(Get),
+    Ok = rxdb_api:parse(Del),
+    Empty = rxdb_api:parse(Get),
     ok.
-    
-    
+
+
     
 %%--------------------------------------------------------------------
 %% @spec TestCase(Config0) ->

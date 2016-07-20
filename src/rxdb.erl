@@ -10,8 +10,8 @@
 
 -behaviour(gen_server).
 
--type rxdb_key() :: binary().
--type rxdb_value() :: binary(). 
+-type rxdb_key() :: binary() | integer() | string().
+-type rxdb_value() :: binary() | integer() | string() | boolean(). 
 
 %% RXDB API
 -export([get/1, put/2, del/1]).
@@ -33,24 +33,19 @@
 
 -spec get(KeyID :: rxdb_key()) -> [] | [{rxdb_key(), rxdb_value()}] | {error, term()}.
 
-get(KeyID) when is_binary(KeyID) ->
-    gen_server:call(?SERVER, {get, KeyID});
 get(KeyID) ->
-    {error, KeyID}.
+    gen_server:call(?SERVER, {get, KeyID}).
 
 -spec put(KeyID :: rxdb_key(), Value :: rxdb_value()) -> ok | {error, {term(), term()}}.
 
-put(KeyID, Value) when is_binary(KeyID) andalso is_binary(Value) ->
-    gen_server:cast(?SERVER, {put, KeyID, Value});
 put(KeyID, Value) ->
-    {error, {KeyID, Value}}.
+    gen_server:cast(?SERVER, {put, KeyID, Value}).
 
 -spec del(KeyID :: rxdb_key()) -> ok | {error, term()}.
 
-del(KeyID) when is_binary(KeyID) ->
-    gen_server:cast(?SERVER, {del, KeyID});
 del(KeyID) ->
-    {error, KeyID}.
+    gen_server:cast(?SERVER, {del, KeyID}).
+
 
 
 %%--------------------------------------------------------------------
