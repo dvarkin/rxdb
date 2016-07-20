@@ -19,7 +19,7 @@ init(Ref, Socket, Transport, _Opts = []) ->
 loop(Socket, Transport) ->
     case Transport:recv(Socket, 0, ?TCP_TIMEOUT) of
 	{ok, Data} ->
-	    Result = rxdb_api:parse(Data),
+	    Result = rxdb_api:parse(Data, Socket),
 	    Transport:send(Socket, Result),
 	    loop(Socket, Transport);
 	_ ->

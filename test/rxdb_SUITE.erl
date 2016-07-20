@@ -10,6 +10,16 @@
 
 -compile(export_all).
 
+-define(PUT, <<"{\"value\":\"Val\",\"key\":\"a\",\"action\":\"put\"}">>).
+-define(PUT1, <<"{\"value\":\"Val1\",\"key\":\"a\",\"action\":\"put\"}">>).
+-define(GET, <<"{\"value\":\"Val1\",\"key\":\"a\",\"action\":\"get\"}">>).
+-define(DEL, <<"{\"value\":\"Val1\",\"key\":\"a\",\"action\":\"del\"}">>).
+-define(SUB, <<"{\"value\":\"Val1\",\"key\":\"a\",\"action\":\"sub\"}">>).
+-define(UPD, <<"{\"value\":\"Val1\",\"key\":\"a\",\"action\":\"upd\"}">>).
+-define(UNSUB, <<"{\"value\":\"Val1\",\"key\":\"a\",\"action\":\"unsub\"}">>).
+-define(OK, <<"\"ok\"">>).
+
+
 -include_lib("common_test/include/ct.hrl").
 
 %%--------------------------------------------------------------------
@@ -115,7 +125,12 @@ groups() ->
 %% @end
 %%--------------------------------------------------------------------
 all() -> 
-    [binary_test_case, binary_protocol_test_case, udp_protocol_test_case].
+    [binary_test_case, 
+     binary_protocol_test_case, 
+     udp_protocol_test_case, 
+     tcp_protocol_test_case,
+     tcp_sub_protocol_test_case
+    ].
 
 %%--------------------------------------------------------------------
 %% @spec TestCase() -> Info
@@ -133,28 +148,60 @@ binary_test_case(_Config) ->
     ok.
 
 binary_protocol_test_case(_Config) ->
-    Ok = <<"\"ok\"">>,
     Empty = <<"[]">>,
-    Put = <<"{\"value\":\"Val1\",\"key\":\"a\",\"a\":\"put\"}">>,
-    Get = <<"{\"value\":\"Val1\",\"key\":\"a\",\"a\":\"get\"}">>,
-    Del = <<"{\"value\":\"Val1\",\"key\":\"a\",\"a\":\"del\"}">>,
-    Ok = rxdb_api:parse(Put),
-    <<"{\"value\":\"Val1\",\"key\":\"a\"}">> = rxdb_api:parse(Get),
-    Ok = rxdb_api:parse(Del),
-    Empty = rxdb_api:parse(Get),
+    ?OK = rxdb_api:parse(?PUT),
+    <<"{\"value\":\"Val\",\"key\":\"a\"}">> = rxdb_api:parse(?GET),
+    ?OK = rxdb_api:parse(?DEL),
+    Empty = rxdb_api:parse(?GET),
+    ?OK = rxdb_api:parse(?SUB, port),
+    ?OK = rxdb_api:parse(?UNSUB, port),
     ok.
 
 udp_protocol_test_case(_Config) ->
-    Ok = <<"\"ok\"">>,
     Empty = <<"[]">>,
-    Put = <<"{\"value\":\"Val1\",\"key\":\"a\",\"a\":\"put\"}">>,
-    Get = <<"{\"value\":\"Val1\",\"key\":\"a\",\"a\":\"get\"}">>,
-    Del = <<"{\"value\":\"Val1\",\"key\":\"a\",\"a\":\"del\"}">>,
-    Ok = rxdb_udp_client:client(Put),
-    <<"{\"value\":\"Val1\",\"key\":\"a\"}">> = rxdb_udp_client:client(Get),
-    Ok = rxdb_udp_client:client(Del),
-    Empty = rxdb_udp_client:client(Get),
+    ?OK = rxdb_raw_client:udp(?PUT),
+    <<"{\"value\":\"Val\",\"key\":\"a\"}">> = rxdb_raw_client:udp(?GET),
+    ?OK = rxdb_raw_client:udp(?DEL),
+    Empty = rxdb_raw_client:udp(?GET),
     ok.
 
-    
+tcp_protocol_test_case(_Config) ->
+    {ok, Sock} = gen_tcp:connect("localhost", 5555, [binary, {packet, 0}, {active, false}]),
+    _Empty = <<"[]">>,
+    gen_tcp:send(Sock, ?PUT),
+    ?OK = recv(Sock),
+    gen_tcp:send(Sock, ?GET),
+    <<"{\"value\":\"Val\",\"key\":\"a\"}">> = recv(Sock),
+    gen_tcp:send(Sock, ?DEL),
+    ?OK = recv(Sock),
+    gen_tcp:close(Sock).
+
+tcp_sub_protocol_test_case(_Config) ->
+    {ok, Sock} = gen_tcp:connect("localhost", 5555, [binary, {packet, 0}, {active, false}]),
+    {ok, SenderSock} = gen_tcp:connect("localhost", 5555, [binary, {packet, 0}, {active, false}]),
+
+    gen_tcp:send(Sock, ?PUT),
+    ?OK = recv(Sock),
+    gen_tcp:send(Sock, ?SUB),
+    ?OK = recv(Sock),
+    gen_tcp:send(SenderSock, ?PUT1),
+
+    %% receive via subscribe
+
+    ?UPD = recv(Sock),
+    gen_tcp:send(Sock, ?DEL),
+    ?OK = recv(Sock),
+    gen_tcp:send(Sock, ?UNSUB),
+    ?OK = recv(Sock),
+    gen_tcp:close(Sock).
+
+
+recv(Socket) ->
+    case gen_tcp:recv(Socket, 0) of
+        {ok, Data} -> 
+            Data;
+        {error, closed} -> 
+            {error, closed}
+    end.
+
 

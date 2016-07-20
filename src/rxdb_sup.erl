@@ -24,5 +24,13 @@ init([]) ->
 	      type => worker,
 	      modules => [rxdb_udp]
 	    },
-    Procs = [RxDB, RxUDP],
+    
+    RxSubHub = #{id => rxdb_sub_hub,
+		 start => {rxdb_sub_hub, start_link, []},
+		 restart => permanent,
+		 shutdown => 5000, 
+		 type => worker,
+		 modules => [rxdb_sub_hub]
+	    },
+    Procs = [RxDB, RxUDP, RxSubHub],
     {ok, {{one_for_one, 1, 5}, Procs}}.

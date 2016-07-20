@@ -5,13 +5,13 @@
 %%% @end
 %%% Created : 20 Jul 2016 by Dmitry Omelechko <dvarkin@gmail.com>
 
--module(rxdb_udp_client).
+-module(rxdb_raw_client).
 
--export([client/1]).
+-export([udp/1]).
 
-client(N) when is_binary(N) ->
+udp(N) when is_binary(N) ->
     {ok, Socket} = gen_udp:open(0, [binary]),
-    io:format("client opened socket=~p~n",[Socket]),
+    io:format("client opened UDP socket=~p~n",[Socket]),
     ok = gen_udp:send(Socket, "localhost", 4444, N),
     Value = receive
                 {udp, Socket, _, _, Bin} ->
@@ -22,4 +22,5 @@ client(N) when is_binary(N) ->
             end,
     gen_udp:close(Socket),
     Value.
+
 
