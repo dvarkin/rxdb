@@ -75,24 +75,27 @@ trails() ->
 allowed_methods(Req, State) ->
   {[<<"GET">>, <<"PUT">>, <<"DELETE">>], Req, State}.
 
-%% internal
+%% GET
 handle_get(Req, State) ->
     {KeyID, _Req1} = cowboy_req:binding(key_id, Req),
-    DBReq = ?RXDB(rxdb:get(KeyID)),
-    JSONReq = jiffy:encode({DBReq}),
+    Query = rxdb_api:make_query(get, KeyID),
+    JSONReq = rxdb_api:parse(Query),
     {JSONReq, Req, State}.
 
+%% PUT
 handle_put(Req, State) ->
     {KeyID, _} = cowboy_req:binding(key_id, Req),
     {ok, Value, Req1} = cowboy_req:body(Req),
-    ?RXDB(rxdb:put(KeyID, Value)),
-    Body1 = [<<"value: ">> ,Value, <<" stored by Key: ">> , KeyID],
-    Req2 = cowboy_req:set_resp_body(Body1, Req1),
+    Query = rxdb_api:make_query(put, KeyID, Value),
+    JSONReq = rxdb_api:parse(Query),
+    Req2 = cowboy_req:set_resp_body(JSONReq, Req1),
     {true, Req2, State}.
 
+%% DELETE
 delete_resource(Req, State)->
     {KeyID, _} = cowboy_req:binding(key_id, Req),
-    ?RXDB(rxdb:del(KeyID)),
+    Query = rxdb_api:make_query(del, KeyID),
+    _JSONReq = rxdb_api:parse(Query),
     {true, Req, State}.
 
 %%% DEFAULTS FOR RANCH

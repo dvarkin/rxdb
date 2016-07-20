@@ -19,7 +19,7 @@
 -define(DEL, <<"del">>).
 
 %% API
--export([parse/1]).
+-export([parse/1, make_query/2, make_query/3]).
 
 %%%===================================================================
 %%% API
@@ -34,6 +34,16 @@ parse(Data) when is_binary(Data) ->
 
 parse(Data) ->
     {error, Data}.
+
+-spec make_query(Action :: get | del, Key :: binary()) -> binary().
+
+make_query(Action, Key) ->
+    jiffy:encode(#{?ACTION => Action, ?KEY => Key}).
+
+-spec make_query(Action :: put, Key :: binary(), Value :: binary()) -> binary().
+
+make_query(Action, Key, Value) ->
+    jiffy:encode(#{?ACTION => Action, ?KEY => Key, ?VALUE => Value}).
 
 %%%===================================================================
 %%% Internal functions
