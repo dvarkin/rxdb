@@ -108,6 +108,7 @@ RxDB supports Swagger notation for API. Swagger documentation and REST demo avai
 
 ### Put Key and Value
 
+
    ```
    curl -X PUT --header "Content-Type: text/plain" --header "Accept: text/plain" -d "KeyValueExample" "http://localhost:8080/rest/MyKey"
    ```
@@ -144,6 +145,7 @@ For test propouses, RxDB contain simple UDP client. You can try to play with RxD
    ```
 
 ### Put with expiration
+
 
     ```
     (rxdb@127.0.0.1)2> rxdb_raw_client:udp(<<"{\"expire\":1,\"value\":\"Val\",\"key\":\"a\",\"action\":\"put\"}">>).

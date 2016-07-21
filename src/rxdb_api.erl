@@ -113,7 +113,7 @@ api(Other, _Client) ->
     api(Other).
 
 
--spec error_handler(Result :: ok | {error, term()}) -> binary().
+-spec error_handler(Result :: ok | {error, term()}) -> ok | error.
 
 error_handler(Result) ->
     case Result of
