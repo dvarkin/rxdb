@@ -33,15 +33,21 @@ RxDB supports Swagger notation for API. Swagger documentation and REST demo avai
 
 ### Get Key
 
-   `curl -X GET --header "Accept: text/plain" "http://localhost:8080/rest/MyKey"
+   ```
+   curl -X GET --header "Accept: text/plain" "http://localhost:8080/rest/MyKey"
+   ```
 
 ### Put Key and Value
 
-   `curl -X PUT --header "Content-Type: text/plain" --header "Accept: text/plain" -d "KeyValueExample" "http://localhost:8080/rest/MyKey"
+   ```
+   curl -X PUT --header "Content-Type: text/plain" --header "Accept: text/plain" -d "KeyValueExample" "http://localhost:8080/rest/MyKey"
+   ```
    
 ### Delete Key
 
-   `curl -X DELETE --header "Accept: text/plain" "http://localhost:8080/rest/MyKey"
+   ```
+   curl -X DELETE --header "Accept: text/plain" "http://localhost:8080/rest/MyKey"
+   ```
 
 
 ## UDP Protocol
@@ -50,18 +56,24 @@ For test propouses, RxDB contain simple UDP client. You can try to play with RxD
 
 ### Get Key
    
-  `(rxdb@127.0.0.1)1> rxdb_raw_client:udp(<<"{\"key\":\"a\",\"action\":\"get\"}">>).
+  ```
+  (rxdb@127.0.0.1)1> rxdb_raw_client:udp(<<"{\"key\":\"a\",\"action\":\"get\"}">>).
    <<"[]">>
+   ```
 
 ### Put Key
 
-  `(rxdb@127.0.0.1)2> rxdb_raw_client:udp(<<"{\"value\":\"Val\",\"key\":\"a\",\"action\":\"put\"}">>).
+  ```
+  (rxdb@127.0.0.1)2> rxdb_raw_client:udp(<<"{\"value\":\"Val\",\"key\":\"a\",\"action\":\"put\"}">>).
    <<"\"ok\"">>
+   ```
 
 ### Delete Key
 
-  `(rxdb@127.0.0.1)4> rxdb_raw_client:udp(<<"{\"key\":\"a\",\"action\":\"del\"}">>).
+  ```
+  (rxdb@127.0.0.1)4> rxdb_raw_client:udp(<<"{\"key\":\"a\",\"action\":\"del\"}">>).
    <<"\"ok\"">>
+   ```
 
 
 ## TCP Protocol
@@ -70,33 +82,44 @@ You can try to insert Rx commands via telnet:
 
 ### Put Key
 
-`$ telnet 127.0.0.1 5555
- Trying 127.0.0.1...
- Connected to localhost.
- Escape character is '^]'.
+```
+$ telnet 127.0.0.1 5555
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+ 
 
 {"action":"put","key":"MyKey","value":"MyValue"}
 "ok"
 
+```
+
 ### Get Key
 
+```
 Trying 127.0.0.1...
 Connected to localhost.
 Escape character is '^]'.
 {"action":"get","key":"MyKey"}
 {"value":"MyValue","key":"MyKey"}
+```
 
 ### Subscribtion 
 
-RxDB supports receiving updates of current Key via subscribtions and only via TCP protocol:
+RxDB supports receiving updates of current Key via subscribtions.
 
+**Subscribtions supprots only with TCP protocol**
+
+```
 Connected to localhost.
 Escape character is '^]'.
 {"action":"sub","key":"MyKey"}
 "ok"
+```
 
 Now you can open another terminal, and Update "MyKey" value.
 
+```
 $ telnet localhost 5555
 Trying ::1...
 telnet: connect to address ::1: Connection refused
@@ -105,14 +128,19 @@ Connected to localhost.
 Escape character is '^]'.
 {"action":"put","key":"MyKey","value":"Receive via subscribtion"}
 "ok"
+```
 
 In first terminal you will get:
 
+```
 {"value":"Receive via subscribtion","key":"MyKey","action":"upd"}
+```
 
 And now you can unsubscribe:
 
+```
 {"action":"unsub","key":"MyKey"}
 "ok"
+```
 
 TODO: monitor TCP sockets, and cleaning subscribtion table from dead ports. 
