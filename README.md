@@ -11,6 +11,8 @@ Build and run
 
 	$ git clone git@github.com:dvarkin/rxdb.git
 
+	$ cd rxdb
+
 	$ make
 
 	$ make tests
