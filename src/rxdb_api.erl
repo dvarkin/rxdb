@@ -20,9 +20,10 @@
 -define(SUB, <<"sub">>).
 -define(UPD, <<"upd">>).
 -define(UNSUB, <<"unsub">>).
+-define(EXPIRE, <<"expire">>).
 
 %% API
--export([parse/1, parse/2, make_query/2, make_query/3]).
+-export([parse/1, parse/2, make_query/2, make_query/3, make_query/4]).
 
 %%%===================================================================
 %%% API
@@ -56,6 +57,12 @@ make_query(Action, Key) ->
 make_query(Action, Key, Value) ->
     jiffy:encode(#{?ACTION => Action, ?KEY => Key, ?VALUE => Value}).
 
+make_query(Action, Key, Value, Expire) when Expire > 0 ->
+    jiffy:encode(#{?ACTION => Action, ?KEY => Key, ?VALUE => Value, ?EXPIRE => Expire});
+
+make_query(Action, Key, Value, _Expire) ->
+    make_query(Action, Key, Value).
+
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
@@ -70,10 +77,16 @@ api(#{?ACTION := ?GET, ?KEY := Key}) ->
 	Result -> Result
     end;
 
+api(#{?ACTION := ?PUT, ?KEY := Key, ?VALUE := Value, ?EXPIRE := Expire}) ->
+    Result =  rxdb:put(Key, Value, Expire),
+    error_handler(Result);
+
 %% PUT
+
 api(#{?ACTION := ?PUT, ?KEY := Key, ?VALUE := Value}) ->
     Result =  rxdb:put(Key, Value),
     error_handler(Result);
+
 
 %% DEL
 api(#{?ACTION := ?DEL, ?KEY := Key}) ->

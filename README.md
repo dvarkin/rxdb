@@ -25,6 +25,69 @@ By default RxDB aquire 3 ports:
 
 TODO: Move port configuration to .config file
 
+## Protocol Overview
+
+RxDB binary protocol is JSON based. 
+
+### Actions
+
+#### GET
+
+get key from store
+
+     ```
+      {
+      "action": "get", "key": "myKey"
+      }     		
+     ```
+     
+#### PUT
+
+put key and value to store
+     ```
+      {
+      "action": "put", "key": "myKey", "value": "newValue"
+      }     		
+     ```
+
+#### PUT with expire
+
+put key and value to store with expire in **seconds**
+     ```
+      {
+      "action": "put", "key": "myKey", "value": "newValue", "expire": 5
+      }     		
+     ```
+#### DEL
+
+delete key from store
+
+     ```
+      {
+      "action": "del", "key": "myKey"
+      }     		
+     ```
+
+#### SUB (TCP only)
+
+subscribe to changes of particular key
+
+     ```
+      {
+      "action": "sub", "key": "myKey"
+      }     		
+     ```
+
+#### UNSUB (TCP only)
+
+unsubscribe to changes of particular key
+
+     ```
+      {
+      "action": "unsub", "key": "myKey"
+      }     		
+     ```
+
 
 ## HTTP/Rest Protocol
 

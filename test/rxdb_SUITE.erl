@@ -11,6 +11,8 @@
 -compile(export_all).
 
 -define(PUT, <<"{\"value\":\"Val\",\"key\":\"a\",\"action\":\"put\"}">>).
+-define(PUT_EXPIRE, <<"{\"expire\":1,\"value\":\"Val\",\"key\":\"a\",\"action\":\"put\"}">>).
+
 -define(PUT1, <<"{\"value\":\"Val1\",\"key\":\"a\",\"action\":\"put\"}">>).
 -define(GET, <<"{\"key\":\"a\",\"action\":\"get\"}">>).
 -define(DEL, <<"{\"key\":\"a\",\"action\":\"del\"}">>).
@@ -18,6 +20,7 @@
 -define(UPD, <<"{\"value\":\"Val1\",\"key\":\"a\",\"action\":\"upd\"}">>).
 -define(UNSUB, <<"{\"key\":\"a\",\"action\":\"unsub\"}">>).
 -define(OK, <<"\"ok\"">>).
+-define(EMPTY, <<"{}">>).
 
 
 -include_lib("common_test/include/ct.hrl").
@@ -129,7 +132,8 @@ all() ->
      binary_protocol_test_case, 
      udp_protocol_test_case, 
      tcp_protocol_test_case,
-     tcp_sub_protocol_test_case
+     tcp_sub_protocol_test_case,
+     expire_protocol_test_case
     ].
 
 %%--------------------------------------------------------------------
@@ -142,32 +146,37 @@ binary_test_case(_Config) ->
     Key = <<"a">>,
     Value = <<"1">>,
     ok = rxdb:put(Key, Value),
-    [{Key, Value}] = rxdb:get(Key),
+    R = #{<<"key">> => <<"a">>,<<"value">> => <<"1">>},
+    R = rxdb:get(Key),
     ok = rxdb:del(Key),
-    [] = rxdb:get(Key),
+    #{} = rxdb:get(Key),
     ok.
 
 binary_protocol_test_case(_Config) ->
-    Empty = <<"[]">>,
     ?OK = rxdb_api:parse(?PUT),
     <<"{\"value\":\"Val\",\"key\":\"a\"}">> = rxdb_api:parse(?GET),
     ?OK = rxdb_api:parse(?DEL),
-    Empty = rxdb_api:parse(?GET),
+    ?EMPTY = rxdb_api:parse(?GET),
     ?OK = rxdb_api:parse(?SUB, port),
     ?OK = rxdb_api:parse(?UNSUB, port),
     ok.
 
+expire_protocol_test_case(_Config) ->
+    ?OK = rxdb_api:parse(?PUT_EXPIRE),
+    <<"{\"value\":\"Val\",\"key\":\"a\"}">> = rxdb_api:parse(?GET),
+    timer:sleep(2000),
+    ?EMPTY = rxdb_api:parse(?GET),
+    ok.
+
 udp_protocol_test_case(_Config) ->
-    Empty = <<"[]">>,
     ?OK = rxdb_raw_client:udp(?PUT),
     <<"{\"value\":\"Val\",\"key\":\"a\"}">> = rxdb_raw_client:udp(?GET),
     ?OK = rxdb_raw_client:udp(?DEL),
-    Empty = rxdb_raw_client:udp(?GET),
+    ?EMPTY = rxdb_raw_client:udp(?GET),
     ok.
 
 tcp_protocol_test_case(_Config) ->
     {ok, Sock} = gen_tcp:connect("localhost", 5555, [binary, {packet, 0}, {active, false}]),
-    _Empty = <<"[]">>,
     gen_tcp:send(Sock, ?PUT),
     ?OK = recv(Sock),
     gen_tcp:send(Sock, ?GET),

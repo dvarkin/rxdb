@@ -42,18 +42,23 @@ trails() ->
 	       },
 	  put =>
 	      #{tags => ["RxDB REST"],
-		description => "Set Value by KeyID",
+		description => "Set Value by KeyID. Expire key is optional",
 		produces => ["text/plain"],
 		parameters => [
 			       #{name => <<"key_id">>,
 				 description => <<"Uniqe Key ID">>,
 				 in => <<"path">>,
-				 required => false,
+				 required => true,
 				 type => <<"string">>},
+			       #{name => <<"expire">>,
+				 description => <<"Expire in Seconds (optional)">>,
+				 in => <<"query">>,
+				 required => false,
+				 type => <<"integer">>},
 			       #{name => <<"value">>,
 				 description => <<"Value">>,
 				 in => <<"body">>,
-				 required => false,
+				 required => true,
 				 type => <<"string">>}]
 	       },
 	  delete =>
@@ -86,7 +91,9 @@ handle_get(Req, State) ->
 handle_put(Req, State) ->
     {KeyID, _} = cowboy_req:binding(key_id, Req),
     {ok, Value, Req1} = cowboy_req:body(Req),
-    Query = rxdb_api:make_query(put, KeyID, Value),
+    {Expire, _} = cowboy_req:qs_val(<<"expire">>, Req),
+%    error_logger:info_msg("expire: ~p~n", [Expire]),
+    Query = rxdb_api:make_query(put, KeyID, Value, binary_to_int(Expire)),
     JSONReq = rxdb_api:parse(Query),
     Req2 = cowboy_req:set_resp_body(JSONReq, Req1),
     {true, Req2, State}.
@@ -118,3 +125,12 @@ forbidden(Req, State) ->
 
 resource_exists(Req, State) ->
   {true, Req, State}.
+
+%% tools
+
+binary_to_int(Bin) when is_binary(Bin) ->
+    try list_to_integer(binary_to_list(Bin)) of
+	R -> R
+    catch
+	_Exception -> undefined
+    end.
