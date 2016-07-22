@@ -83,8 +83,8 @@ allowed_methods(Req, State) ->
 %% GET
 handle_get(Req, State) ->
     {KeyID, _Req1} = cowboy_req:binding(key_id, Req),
-    Query = rxdb_api:make_query(get, KeyID),
-    JSONReq = rxdb_api:parse(Query),
+    Query = rxdb_protocol:make_query(get, KeyID),
+    JSONReq = rxdb_protocol:parse(Query),
     {JSONReq, Req, State}.
 
 %% PUT
@@ -93,16 +93,16 @@ handle_put(Req, State) ->
     {ok, Value, Req1} = cowboy_req:body(Req),
     {Expire, _} = cowboy_req:qs_val(<<"expire">>, Req),
 %    error_logger:info_msg("expire: ~p~n", [Expire]),
-    Query = rxdb_api:make_query(put, KeyID, Value, binary_to_int(Expire)),
-    JSONReq = rxdb_api:parse(Query),
+    Query = rxdb_protocol:make_query(put, KeyID, Value, binary_to_int(Expire)),
+    JSONReq = rxdb_protocol:parse(Query),
     Req2 = cowboy_req:set_resp_body(JSONReq, Req1),
     {true, Req2, State}.
 
 %% DELETE
 delete_resource(Req, State)->
     {KeyID, _} = cowboy_req:binding(key_id, Req),
-    Query = rxdb_api:make_query(del, KeyID),
-    _JSONReq = rxdb_api:parse(Query),
+    Query = rxdb_protocol:make_query(del, KeyID),
+    _JSONReq = rxdb_protocol:parse(Query),
     {true, Req, State}.
 
 %%% DEFAULTS FOR RANCH

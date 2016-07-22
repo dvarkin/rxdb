@@ -17,7 +17,7 @@ init(Ref, Socket, Transport, _Opts = []) ->
 loop(Socket, Transport) ->
     case Transport:recv(Socket, 0, ?TCP_TIMEOUT) of
 	{ok, Data} ->
-	    R = try rxdb_api:parse(Data, Socket) of
+	    R = try rxdb_protocol:parse(Data, Socket) of
 		    Result -> Result
 		catch 
 		    _ -> jiffy:encode(#{error => <<"Incorrect JSON">>, received => Data})

@@ -153,19 +153,19 @@ binary_test_case(_Config) ->
     ok.
 
 binary_protocol_test_case(_Config) ->
-    ?OK = rxdb_api:parse(?PUT),
-    <<"{\"value\":\"Val\",\"key\":\"a\"}">> = rxdb_api:parse(?GET),
-    ?OK = rxdb_api:parse(?DEL),
-    ?EMPTY = rxdb_api:parse(?GET),
-    ?OK = rxdb_api:parse(?SUB, port),
-    ?OK = rxdb_api:parse(?UNSUB, port),
+    ?OK = rxdb_protocol:parse(?PUT),
+    <<"{\"value\":\"Val\",\"key\":\"a\"}">> = rxdb_protocol:parse(?GET),
+    ?OK = rxdb_protocol:parse(?DEL),
+    ?EMPTY = rxdb_protocol:parse(?GET),
+    ?OK = rxdb_protocol:parse(?SUB, port),
+    ?OK = rxdb_protocol:parse(?UNSUB, port),
     ok.
 
 expire_protocol_test_case(_Config) ->
-    ?OK = rxdb_api:parse(?PUT_EXPIRE),
-    <<"{\"value\":\"Val\",\"key\":\"a\"}">> = rxdb_api:parse(?GET),
+    ?OK = rxdb_protocol:parse(?PUT_EXPIRE),
+    <<"{\"value\":\"Val\",\"key\":\"a\"}">> = rxdb_protocol:parse(?GET),
     timer:sleep(2000),
-    ?EMPTY = rxdb_api:parse(?GET),
+    ?EMPTY = rxdb_protocol:parse(?GET),
     ok.
 
 udp_protocol_test_case(_Config) ->

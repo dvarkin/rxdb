@@ -10,7 +10,7 @@
 
 -behaviour(gen_server).
 
-%% API
+%% PROTOCOL
 -export([start_link/0]).
 
 -export([sub/2, unsub/1, unsub/2, update/2]).
@@ -24,7 +24,7 @@
 -record(state, {subscribers}).
 
 %%%===================================================================
-%%% API
+%%% PROTOCOL
 %%%===================================================================
 
 sub(Key, Client) ->
@@ -101,7 +101,7 @@ send_to_port(Socket, Key, Value) when is_port(Socket) ->
 	undefined ->
 	    ok;
 	_ ->
-	    Message = rxdb_api:make_query(upd, Key, Value),
+	    Message = rxdb_protocol:make_query(upd, Key, Value),
 	    gen_tcp:send(Socket, Message)
 	end;
 send_to_port(_Socket, _Key, _Value) ->

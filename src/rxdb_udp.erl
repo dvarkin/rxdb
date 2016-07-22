@@ -10,8 +10,8 @@
 
 -behaviour(gen_server).
 
-%% API
--export([start_link/1, client/1]).
+%% PROTOCOL
+-export([start_link/1]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -22,7 +22,7 @@
 -record(state, {socket :: port()}).
 
 %%%===================================================================
-%%% API
+%%% PROTOCOL
 %%%===================================================================
 
 %%--------------------------------------------------------------------
@@ -51,7 +51,7 @@ handle_cast(_Msg, State) ->
     {noreply, State}.
 
 handle_info({udp, Socket, Host, Port, Bin}, State) ->
-    Result = rxdb_api:parse(Bin),
+    Result = rxdb_protocol:parse(Bin),
     gen_udp:send(Socket, Host, Port, Result),
     {noreply, State};
 handle_info(_Info, State) ->
@@ -63,42 +63,3 @@ terminate(_Reason, #state{socket = Socket}) ->
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
-
-%%%===================================================================
-%%% Internal functions
-%%%===================================================================
-
-%% -module(rxdb_udp).
-
-%% -export([start/0, client/1]).
-
-%% start() ->
-%%     spawn(fun() -> server(4444) end).
-
-%% server(Port) ->
-%%     {ok, Socket} = gen_udp:open(Port, [binary, {active, false}]),
-%%     io:format("UDP server opened socket:~p~n",[Socket]),
-%%     loop(Socket).
-
-%% loop(Socket) ->
-%%     inet:setopts(Socket, [{active, once}]),
-%%     receive
-%%         {udp, Socket, Host, Port, Bin} ->
-%% 	    Result = rxdb_api:parse(Bin),
-%%             gen_udp:send(Socket, Host, Port, Result),
-%%             loop(Socket)
-%%     end.
-
-% Client code
-client(N) ->
-    {ok, Socket} = gen_udp:open(0, [binary]),
-    io:format("client opened socket=~p~n",[Socket]),
-    ok = gen_udp:send(Socket, "localhost", 4444, N),
-    Value = receive
-                {udp, Socket, _, _, Bin} ->
-                    io:format("client received:~p~n",[Bin])
-            after 2000 ->
-                    0
-            end,
-    gen_udp:close(Socket),
-    Value.
