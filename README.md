@@ -42,9 +42,11 @@ RxDB binary protocol is JSON based.
 
 ### Actions
 
+You can send commands to RxDB via TCP/UDP protocols or use HTTP/REST. 
+
 #### GET
 
-get key from store
+Get uniqe key from store:
 
 
       {
@@ -54,7 +56,7 @@ get key from store
      
 #### PUT
 
-put key and value to store
+Put unique key and value to store. If key is already exists in the store, it will be replaced with new value.
 
 
       {
@@ -64,7 +66,7 @@ put key and value to store
 
 #### PUT with expire
 
-put key and value to store with expire in **seconds**
+Put key and value to store with expire in **seconds**. You can get this key after expiration.
 
 
       {
@@ -74,7 +76,7 @@ put key and value to store with expire in **seconds**
      
 #### DEL
 
-delete key from store
+Delete key from store
 
 
       {
@@ -84,7 +86,7 @@ delete key from store
 
 #### SUB (TCP only)
 
-subscribe to changes of particular key
+Subscribe to changes of particular key. 
 
 
       {
@@ -94,7 +96,7 @@ subscribe to changes of particular key
 
 #### UNSUB (TCP only)
 
-unsubscribe to changes of particular key
+Unsubscribe to changes of particular key
 
     
       {
@@ -109,28 +111,30 @@ RxDB supports **Swagger** notation for API. Swagger documentation and REST demo 
 
 ### Get Key
 
-   ```
+
    curl -X GET --header "Accept: text/plain" "http://localhost:8080/rest/MyKey"
-   ```
+
 
 ### Put Key and Value
 
 
-   ```
+
    curl -X PUT --header "Content-Type: text/plain" --header "Accept: text/plain" -d "KeyValueExample" "http://localhost:8080/rest/MyKey"
-   ```
 
-### Put Key and Value with expiration
 
-   ```
+### Put Key and Value with expiration.
+
+Expiration is an optional argument.
+
+
    curl -X PUT --header "Content-Type: application/json" --header "Accept: text/plain" -d "asd" "http://localhost:8080/rest/a?expire=5"
-   ```
+
    
 ### Delete Key
 
-   ```
+
    curl -X DELETE --header "Accept: text/plain" "http://localhost:8080/rest/MyKey"
-   ```
+
 
 
 ## UDP Protocol
@@ -139,32 +143,31 @@ For test propouses, RxDB contain simple UDP client. You can try to play with RxD
 
 ### Get Key
    
-   ```
+
    (rxdb@127.0.0.1)1> rxdb_raw_client:udp(<<"{\"key\":\"a\",\"action\":\"get\"}">>).
    <<"[]">>
-   ```
+
 
 ### Put Key
 
-    ```
+
     (rxdb@127.0.0.1)2> rxdb_raw_client:udp(<<"{\"value\":\"Val\",\"key\":\"a\",\"action\":\"put\"}">>).
     <<"\"ok\"">>
-    ```
+
 
 ### Put with expiration
 
 
-    ```
+
     (rxdb@127.0.0.1)2> rxdb_raw_client:udp(<<"{\"expire\":1,\"value\":\"Val\",\"key\":\"a\",\"action\":\"put\"}">>).
 
-    ```
 
 ### Delete Key
 
-    ```
+
     (rxdb@127.0.0.1)4> rxdb_raw_client:udp(<<"{\"key\":\"a\",\"action\":\"del\"}">>).
     <<"\"ok\"">>
-    ```
+
 
 ## TCP Protocol
    
