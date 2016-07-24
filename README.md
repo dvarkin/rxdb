@@ -19,6 +19,13 @@ Build and run
 
 	$ make run
 
+Generate souce code Docs
+----------
+
+Edocs available in Markup format. To generate source code documenation type in shell:
+
+      $ make edoc
+
 By default RxDB aquire 3 ports:
 
    - 8080 for HTTP/REST
@@ -98,7 +105,7 @@ unsubscribe to changes of particular key
 ## HTTP/Rest Protocol
 
 
-RxDB supports Swagger notation for API. Swagger documentation and REST demo available at (http://localhost:8080/api-docs/index.html).
+RxDB supports **Swagger** notation for API. Swagger documentation and REST demo available on *http://localhost:8080/api-docs/index.html*.
 
 ### Get Key
 
@@ -115,9 +122,9 @@ RxDB supports Swagger notation for API. Swagger documentation and REST demo avai
 
 ### Put Key and Value with expiration
 
-    ```
-    curl -X PUT --header "Content-Type: application/json" --header "Accept: text/plain" -d "asd" "http://localhost:8080/rest/a?expire=5"
-    ```
+   ```
+   curl -X PUT --header "Content-Type: application/json" --header "Accept: text/plain" -d "asd" "http://localhost:8080/rest/a?expire=5"
+   ```
    
 ### Delete Key
 
@@ -132,17 +139,17 @@ For test propouses, RxDB contain simple UDP client. You can try to play with RxD
 
 ### Get Key
    
-  ```
-  (rxdb@127.0.0.1)1> rxdb_raw_client:udp(<<"{\"key\":\"a\",\"action\":\"get\"}">>).
+   ```
+   (rxdb@127.0.0.1)1> rxdb_raw_client:udp(<<"{\"key\":\"a\",\"action\":\"get\"}">>).
    <<"[]">>
    ```
 
 ### Put Key
 
-  ```
-  (rxdb@127.0.0.1)2> rxdb_raw_client:udp(<<"{\"value\":\"Val\",\"key\":\"a\",\"action\":\"put\"}">>).
-   <<"\"ok\"">>
-   ```
+    ```
+    (rxdb@127.0.0.1)2> rxdb_raw_client:udp(<<"{\"value\":\"Val\",\"key\":\"a\",\"action\":\"put\"}">>).
+    <<"\"ok\"">>
+    ```
 
 ### Put with expiration
 
@@ -154,11 +161,10 @@ For test propouses, RxDB contain simple UDP client. You can try to play with RxD
 
 ### Delete Key
 
-  ```
-  (rxdb@127.0.0.1)4> rxdb_raw_client:udp(<<"{\"key\":\"a\",\"action\":\"del\"}">>).
-   <<"\"ok\"">>
-   ```
-
+    ```
+    (rxdb@127.0.0.1)4> rxdb_raw_client:udp(<<"{\"key\":\"a\",\"action\":\"del\"}">>).
+    <<"\"ok\"">>
+    ```
 
 ## TCP Protocol
    

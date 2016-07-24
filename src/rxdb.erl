@@ -10,7 +10,12 @@
 
 -behaviour(gen_server).
 
+
+%% @type rxdb_key() = binary() | integer() | string()
+
 -type rxdb_key() :: binary() | integer() | string().
+
+%% @type rxdb_value() = binary() | integer() | string() | boolean()
 -type rxdb_value() :: binary() | integer() | string() | boolean(). 
 
 %% RXDB API
@@ -41,7 +46,6 @@
 
 get(KeyID) ->
     gen_server:call(?SERVER, {get, KeyID}).
-
 
 %%--------------------------------------------------------------------
 %% @doc PUT Key and Value to the RxDB store. 
@@ -153,6 +157,14 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+
+%%--------------------------------------------------------------------
+%% @doc this function invoces in spawn/1 and check every response for expiration. 
+%% TODO: replace expired key from ETS. ETS should be public. 
+%% @private
+%% @spec
+%% @end
+%%--------------------------------------------------------------------
 
 reply_check_expire(From, Store, KeyID) ->
     R = ets:lookup(Store, KeyID),
