@@ -9,4 +9,7 @@ dep_cowboy_swagger = git https://github.com/inaka/cowboy-swagger.git
 
 CT_SUITES = rxdb
 
+DOC_DEPS = edown
+EDOC_OPTS = {doclet, edown_doclet}
+
 include erlang.mk

@@ -1,12 +1,14 @@
 %%%-------------------------------------------------------------------
 %%% @author Dmitry Omelechko <dvarkin@gmail.com>
 %%% @copyright (C) 2016, Dmitry Omelechko
-%%% @doc
-%%%
+%%% @doc Entry point for RxDB protocol.
+%%% Contain functions for parse Binary data of requests, and transfrom RxDB responses to Binary Data.
 %%% @end
 %%% Created : 20 Jul 2016 by Dmitry Omelechko <dvarkin@gmail.com>
 %%%-------------------------------------------------------------------
--module(rxdb_protocol).
+-module(rxdb_protocol). 
+
+%%%% Main anchers in protocol %%%%
 
 -define(ACTION, <<"action">>).
 -define(KEY, <<"key">>).
@@ -33,7 +35,7 @@
 %%--------------------------------------------------------------------
 %% @doc Entry point for RxDB binary protocol. 
 %% Parse binary data and call RxDB internal functions.  
-%% @spec parse(Data :: binary()) -> binary().
+%% @spec parse(Data :: binary()) -> binary()
 %% @end
 %%--------------------------------------------------------------------
 
@@ -51,7 +53,7 @@ parse(Data) ->
 %% @doc Entry point for RxDB binary protocol. 
 %% Parse binary data and call RxDB internal functions.  
 %% Client - is an client's port, wich made a call. Use for subscribe/unsubscribe.  
-%% @spec parse(Data :: binary(), Client :: port()) -> binary().
+%% @spec parse(Data :: binary(), Client :: port()) -> binary()
 %% @end
 %%--------------------------------------------------------------------
 
@@ -67,7 +69,7 @@ parse(Data, Client) ->
 
 %%--------------------------------------------------------------------
 %% @doc Transfrom RxDB response to binary json. 
-%% @spec make_query(Action :: get | del, Key :: binary()) -> binary().
+%% @spec make_query(Action :: get | del, Key :: binary()) -> binary()
 %% @end
 %%--------------------------------------------------------------------
 
@@ -95,7 +97,7 @@ make_query(Action, Key, Value, _Expire) ->
 %% @doc Match decoded map and call internal RxDB functions. 
 %% This function use for call GET/PUT/DEL functions
 %% @private
-%% @spec protocol(Data :: map()) -> binary().
+%% @spec protocol(Data :: map()) -> binary()
 %% @end
 %%--------------------------------------------------------------------
 
@@ -132,7 +134,7 @@ protocol(Err) ->
 %% @doc Match decoded map and call internal RxDB functions. 
 %% This function use for call SUB/UNSUB functions
 %% @private
-%% @spec protocol(Data :: map(), Client :: port()) -> binary().
+%% @spec protocol(Data :: map(), Client :: port()) -> binary()
 %% @end
 %%--------------------------------------------------------------------
 

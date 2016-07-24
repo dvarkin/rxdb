@@ -17,7 +17,7 @@
 
 %%--------------------------------------------------------------------
 %% @doc Convinient error handler. 
-%% @spec error_handler(Result :: ok | {error, term()}) -> ok | error.
+%% @spec protocol_error_handler(Result :: ok | {error, term()}) -> ok | error
 %% @end
 %%--------------------------------------------------------------------
 

@@ -1,7 +1,7 @@
 %%%-------------------------------------------------------------------
 %%% @author Dmitry Omelechko <dvarkin@gmail.com>
 %%% @copyright (C) 2016, Dmitry Omelechko
-%%% @doc
+%%% @doc Simple UDP server
 %%%
 %%% @end
 %%% Created : 20 Jul 2016 by Dmitry Omelechko <dvarkin@gmail.com>
@@ -27,9 +27,9 @@
 
 %%--------------------------------------------------------------------
 %% @doc
-%% Starts the server
+%% Starts the server.
 %%
-%% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
+%% @spec start_link(Port :: pos_integer()) -> {ok, Pid} | ignore | {error, Error}
 %% @end
 %%--------------------------------------------------------------------
 start_link(Port) when Port > 0 ->
