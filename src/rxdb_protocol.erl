@@ -29,6 +29,14 @@
 %%% PROTOCOL
 %%%===================================================================
 
+
+%%--------------------------------------------------------------------
+%% @doc Entry point for RxDB binary protocol. 
+%% Parse binary data and call RxDB internal functions.  
+%% @spec parse(Data :: binary()) -> binary().
+%% @end
+%%--------------------------------------------------------------------
+
 -spec parse(Data :: binary()) -> binary().
 
 parse(Data) when is_binary(Data) -> 
@@ -39,6 +47,16 @@ parse(Data) when is_binary(Data) ->
 parse(Data) ->
     {error, Data}.
 
+%%--------------------------------------------------------------------
+%% @doc Entry point for RxDB binary protocol. 
+%% Parse binary data and call RxDB internal functions.  
+%% Client - is an client's port, wich made a call. Use for subscribe/unsubscribe.  
+%% @spec parse(Data :: binary(), Client :: port()) -> binary().
+%% @end
+%%--------------------------------------------------------------------
+
+-spec parse(Data :: binary(), Client :: port()) -> binary().
+
 parse(Data, Client) when is_binary(Data) ->
     R = jiffy:decode(Data, [return_maps]),
     Result = protocol(R, Client),
@@ -46,6 +64,12 @@ parse(Data, Client) when is_binary(Data) ->
 parse(Data, Client) ->
     {error, {Data, Client}}.
 
+
+%%--------------------------------------------------------------------
+%% @doc Transfrom RxDB response to binary json. 
+%% @spec make_query(Action :: get | del, Key :: binary()) -> binary().
+%% @end
+%%--------------------------------------------------------------------
 
 -spec make_query(Action :: get | del, Key :: binary()) -> binary().
 
@@ -67,6 +91,14 @@ make_query(Action, Key, Value, _Expire) ->
 %%% Internal functions
 %%%===================================================================
 
+%%--------------------------------------------------------------------
+%% @doc Match decoded map and call internal RxDB functions. 
+%% This function use for call GET/PUT/DEL functions
+%% @private
+%% @spec protocol(Data :: map()) -> binary().
+%% @end
+%%--------------------------------------------------------------------
+
 -spec protocol(Data :: map()) -> binary().
 
 %% GET
@@ -79,48 +111,44 @@ protocol(#{?ACTION := ?GET, ?KEY := Key}) ->
 
 protocol(#{?ACTION := ?PUT, ?KEY := Key, ?VALUE := Value, ?EXPIRE := Expire}) ->
     Result =  rxdb:put(Key, Value, Expire),
-    error_handler(Result);
+    rxdb_tools:protocol_error_handler(Result);
 
 %% PUT
 
 protocol(#{?ACTION := ?PUT, ?KEY := Key, ?VALUE := Value}) ->
     Result =  rxdb:put(Key, Value),
-    error_handler(Result);
-
+    rxdb_tools:protocol_error_handler(Result);
 
 %% DEL
 protocol(#{?ACTION := ?DEL, ?KEY := Key}) ->
     Result = rxdb:del(Key),
-    error_handler(Result);
+    rxdb_tools:protocol_error_handler(Result);
 
 protocol(Err) ->
     error_logger:error_msg("PROTOCOL Error: unsupported message ~p~n", [Err]),
     <<"Unupported operation">>.
+
+%%--------------------------------------------------------------------
+%% @doc Match decoded map and call internal RxDB functions. 
+%% This function use for call SUB/UNSUB functions
+%% @private
+%% @spec protocol(Data :: map(), Client :: port()) -> binary().
+%% @end
+%%--------------------------------------------------------------------
 
 -spec protocol(Data :: map(), Client :: port()) -> binary().
 
 %% SUB
 protocol(#{?ACTION := ?SUB, ?KEY := Key}, Client) ->
     Result = rxdb_sub_hub:sub(Key, Client),
-    error_handler(Result);
+    rxdb_tools:protocol_error_handler(Result);
 
 %% UNSUB
 protocol(#{?ACTION := ?UNSUB, ?KEY := Key}, Client) ->
     Result = rxdb_sub_hub:sub(Key, Client),
-    error_handler(Result);
+    rxdb_tools:protocol_error_handler(Result);
 
 protocol(Other, _Client) ->
     protocol(Other).
 
-
--spec error_handler(Result :: ok | {error, term()}) -> ok | error.
-
-error_handler(Result) ->
-    case Result of
-	ok -> 
-	    ok;
-	{error, Error} ->
-	    error_logger:error_msg("Error: ~p~n", [Error]),
-	    error
-    end.
 
